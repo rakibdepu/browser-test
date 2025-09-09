@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Browser Redirect</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height:1.6; color:#333;
+    background: linear-gradient(135deg,#6e8efb,#a777e3);
+    min-height:100vh; padding:20px;
+    display:flex; justify-content:center; align-items:center;
+  }
+  .container { max-width:800px; width:100%; background:rgba(255,255,255,0.95); border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.15); overflow:hidden; }
+  header { background:#4e6ef5; color:white; padding:25px; text-align:center; }
+  header h1 { font-size:2.2rem; margin-bottom:10px; }
+  header p { opacity:0.9; }
+  .content { padding:30px; }
+  .status-card { background:#f8f9fa; border-radius:10px; padding:20px; margin-bottom:25px; border-left:4px solid #4e6ef5; }
+  .status-title { display:flex; align-items:center; margin-bottom:15px; }
+  .status-title i { font-size:1.5rem; margin-right:10px; }
+  .status-message { font-size:1.1rem; font-weight:500; }
+  .webview-detected { border-left-color:#ff9500; }
+  .redirect-notice { background:#fff4e6; border-radius:10px; padding:20px; margin-bottom:25px; display:flex; align-items:center; }
+  .redirect-notice i { color:#ff9500; font-size:2rem; margin-right:15px; }
+  .redirect-notice p { flex:1; }
+  .countdown { font-weight:bold; color:#e63757; font-size:1.2rem; }
+  .ua-info { margin-bottom:25px; }
+  .ua-info h3 { margin-bottom:10px; color:#4e6ef5; }
+  .ua-string { background:#f1f3f5; padding:15px; border-radius:8px; font-family:monospace; font-size:0.9rem; overflow-x:auto; white-space:pre-wrap; word-break:break-all; }
+  .current-url-info { background:#e8f4ff; border-radius:10px; padding:20px; margin:25px 0; }
+  .current-url-info h3 { color:#4285f4; margin-bottom:15px; }
+  .url-display { background:#d1e7ff; padding:10px 15px; border-radius:8px; font-family:monospace; word-break:break-all; margin:10px 0; }
+  .browser-icons { display:flex; justify-content:space-around; margin:30px 0; }
+  .browser-icon { text-align:center; padding:15px; border-radius:10px; transition:transform 0.3s, background 0.3s; cursor:pointer; }
+  .browser-icon:hover { transform:translateY(-5px); background: rgba(78,110,245,0.1); }
+  .browser-icon i { font-size:2.5rem; margin-bottom:10px; }
+  .chrome i { color:#4285f4; } .firefox i { color:#ff9500; } .safari i { color:#3baeef; } .edge i { color:#4e6ef5; }
+  .manual-redirect { text-align:center; margin-top:20px; }
+  .btn { display:inline-block; background:#4e6ef5; color:white; padding:12px 25px; border-radius:30px; text-decoration:none; font-weight:600; transition:background 0.3s, transform 0.2s; border:none; cursor:pointer; margin:5px; }
+  .btn:hover { background:#3a56d4; transform:translateY(-2px); }
+  .btn-outline { background:transparent; border:2px solid #4e6ef5; color:#4e6ef5; }
+  .btn-outline:hover { background:#4e6ef5; color:white; }
+  footer { text-align:center; padding:20px; border-top:1px solid #e9ecef; color:#6c757d; font-size:0.9rem; }
+  @media(max-width:600px){ header h1{ font-size:1.8rem; } .browser-icons{ flex-wrap:wrap; } .browser-icon{ width:50%; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1><i class="fas fa-external-link-alt"></i> Smart Browser Redirect</h1>
+    <p>Optimizing your browsing experience</p>
+  </header>
+  
+  <div class="content">
+    <div class="status-card" id="statusCard">
+      <div class="status-title">
+        <i class="fas fa-spinner fa-spin"></i>
+        <h2>Analyzing your browser...</h2>
+      </div>
+      <p class="status-message" id="statusMessage">Checking your browser environment for optimal experience.</p>
+    </div>
+    
+    <div class="redirect-notice" id="redirectNotice" style="display:none;">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p id="redirectText">Redirecting to recommended browser in <span class="countdown" id="countdown">5</span> seconds...</p>
+    </div>
+    
+    <div class="current-url-info">
+      <h3><i class="fas fa-link"></i> Current URL Detection</h3>
+      <div class="url-display" id="currentUrlDisplay">Detecting...</div>
+    </div>
+    
+    <div class="ua-info">
+      <h3><i class="fas fa-code"></i> Your User Agent String</h3>
+      <div class="ua-string" id="uaString">Detecting...</div>
+    </div>
+    
+    <div>
+      <h3><i class="fas fa-window-restore"></i> Recommended Browsers</h3>
+      <div class="browser-icons">
+        <div class="browser-icon chrome">
+          <i class="fab fa-chrome"></i><p>Chrome</p>
+        </div>
+        <div class="browser-icon firefox">
+          <i class="fab fa-firefox-browser"></i><p>Firefox</p>
+        </div>
+        <div class="browser-icon safari">
+          <i class="fab fa-safari"></i><p>Safari</p>
+        </div>
+        <div class="browser-icon edge">
+          <i class="fab fa-edge"></i><p>Edge</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="manual-redirect">
+      <p>If you were not redirected automatically, try these options:</p>
+      <a href="#" class="btn" id="redirectButton">Open Recommended Browser</a>
+      <a href="#" class="btn btn-outline" id="playStoreButton">Install Chrome</a>
+      <button class="btn btn-outline" id="stayButton">Stay Here</button>
+    </div>
+  </div>
+  
+  <footer>
+    <p>Smart Redirect Solution | &copy; 2025</p>
+  </footer>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const statusCard = document.getElementById("statusCard");
+  const statusMessage = document.getElementById("statusMessage");
+  const uaString = document.getElementById("uaString");
+  const redirectNotice = document.getElementById("redirectNotice");
+  const redirectText = document.getElementById("redirectText");
+  const countdownEl = document.getElementById("countdown");
+  const redirectButton = document.getElementById("redirectButton");
+  const playStoreButton = document.getElementById("playStoreButton");
+  const stayButton = document.getElementById("stayButton");
+  const currentUrlDisplay = document.getElementById("currentUrlDisplay");
+
+  const targetUrl = window.location.href;
+  const playStoreUrl = "https://play.google.com/store/apps/details?id=com.android.chrome";
+  const countdownStart = 5;
+  let countdown = countdownStart;
+  let countdownInterval;
+  let isWebView = false;
+  let redirectUrl = "";
+  let recommendedBrowser = "";
+
+  // Display URL and UA
+  currentUrlDisplay.textContent = targetUrl;
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  uaString.textContent = ua;
+
+  // Detect WebViews
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const androidWebView = isAndroid && (/wv/i.test(ua) || /FBAV/i.test(ua) || /Instagram/i.test(ua) || /WhatsApp/i.test(ua) || /Version\//i.test(ua));
+  const iosWebView = isIOS && !/Safari/i.test(ua) && (/FBAN|FBAV|Instagram|FBIOS|WhatsApp/i.test(ua));
+
+  if(androidWebView || iosWebView){
+    isWebView = true;
+    statusCard.classList.add("webview-detected");
+    statusCard.querySelector("i").className = "fas fa-exclamation-circle";
+    statusMessage.innerHTML = "WebView detected. Redirecting to a recommended browser for better experience.";
+    redirectNotice.style.display = "flex";
+
+    if(androidWebView){
+      recommendedBrowser = "Chrome";
+      const encodedUrl = encodeURIComponent(targetUrl);
+      redirectUrl = `intent://${window.location.host}${window.location.pathname}${window.location.search}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end;`;
+    } else if(iosWebView){
+      recommendedBrowser = "Safari";
+      redirectUrl = targetUrl; // iOS cannot launch Chrome reliably in WebView
+    }
+
+    redirectText.innerHTML = `You're using a WebView. Redirecting to <strong>${recommendedBrowser}</strong> in <span class="countdown" id="countdown">${countdown}</span> seconds...`;
+
+    // Set manual buttons
+    redirectButton.href = redirectUrl;
+    playStoreButton.href = playStoreUrl;
+
+    countdownInterval = setInterval(()=>{
+      countdown--;
+      countdownEl.textContent = countdown;
+      if(countdown <= 0){
+        clearInterval(countdownInterval);
+        window.location.href = redirectUrl;
+      }
+    },1000);
+
+    redirectButton.addEventListener("click", ()=> clearInterval(countdownInterval));
+
+  } else {
+    statusCard.querySelector("i").className = "fas fa-check-circle";
+    statusMessage.innerHTML = "✅ No WebView detected. You're using a standard browser.";
+    redirectNotice.style.display = "none";
+    document.querySelector(".manual-redirect").style.display = "none";
+  }
+
+  stayButton.addEventListener("click", function(){
+    if(isWebView){
+      clearInterval(countdownInterval);
+      redirectNotice.style.display = "none";
+      statusMessage.innerHTML = "You chose to stay in the current browser. Experience may be limited.";
+    }
+  });
+});
+</script>
+</body>
+</html>
