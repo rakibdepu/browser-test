@@ -5,7 +5,7 @@
 $userAgent = $_SERVER['HTTP_USER_AGENT'];
 
 // Your target URL (where you want to send users if Chrome is available)
-$targetUrl = "https://yourdomain.com"; // <-- change this to your real URL
+$targetUrl = "http://rakibdepu.github.io/"; // <-- change this to your real URL
 
 // Check if request comes from Android WebView (including Facebook in-app browser)
 if (stripos($userAgent, 'Android') !== false &&
