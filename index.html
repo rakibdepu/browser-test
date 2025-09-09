@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Agent Detection</title>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var ua = navigator.userAgent || navigator.vendor || window.opera;
+      var targetUrl = "https://rakibdepu.github.io"; // <-- change this to your real URL
+
+      // Show the user agent
+      document.getElementById("ua").textContent = ua;
+
+      // Detect Android WebView (including Facebook in-app browser)
+      if (/Android/i.test(ua) && (/wv/i.test(ua) || /Version\//i.test(ua) || /FBAV/i.test(ua))) {
+        document.getElementById("status").innerHTML =
+          "📱 Android WebView detected (including Facebook in-app browser). Redirecting to Chrome...";
+
+        // Build intent URL with fallback to Play Store
+        var intentUrl = "intent://" + encodeURIComponent(targetUrl) +
+          "#Intent;scheme=https;package=com.android.chrome;" +
+          "S.browser_fallback_url=" +
+          encodeURIComponent("https://play.google.com/store/apps/details?id=com.android.chrome") +
+          ";end;";
+
+        // Wait 2 seconds so user can see UA before redirect
+        setTimeout(function () {
+          window.location.href = intentUrl;
+        }, 2000);
+      } else {
+        document.getElementById("status").innerHTML =
+          "✅ No WebView detected.";
+      }
+    });
+  </script>
+</head>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+  <h3 id="status">Checking browser...</h3>
+  <p><b>User Agent:</b></p>
+  <pre id="ua" style="background:#f4f4f4; padding:10px; border-radius:5px;"></pre>
+</body>
+</html>
